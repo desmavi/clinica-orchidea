@@ -48,8 +48,8 @@ class AuthService:
 
             user = user_response.user
 
-            # Get user role from custom table
-            user_data = self._get_user_data(user.id)
+            # Get user role from custom table (creates user if not exists)
+            user_data = self._get_user_data(user.id, user.email)
 
             return UserResponse(
                 id=user.id,
@@ -66,7 +66,7 @@ class AuthService:
                 detail=f"Errore nell'autenticazione: {str(e)}"
             )
 
-    def _get_user_data(self, user_id: str) -> Dict[str, Any]:
+    def _get_user_data(self, user_id: str, email: str = None) -> Dict[str, Any]:
         try:
             # Try to get existing user
             result = self.admin_client.table("users").select("*").eq("id", user_id).execute()
@@ -75,9 +75,10 @@ class AuthService:
                 return result.data[0]
 
             # User doesn't exist - create with default role 'patient'
-            # This happens on first login after magic link click
+            # on first login after magic link click
             new_user = {
                 "id": user_id,
+                "email": email,
                 "role": "patient"
             }
 

@@ -103,7 +103,7 @@ export function Login() {
               </p>
             </div>
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button type="submit" className="w-full bg-cyan-600 hover:bg-cyan-700 text-white" disabled={isSubmitting}>
               {isSubmitting ? 'Invio in corso...' : 'Invia Magic Link'}
             </Button>
           </form>

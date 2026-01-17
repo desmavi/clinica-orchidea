@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.routes import auth
+from app.routes import auth, doctors
 
 # Create FastAPI app instance
 app = FastAPI(
@@ -24,6 +24,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
+app.include_router(doctors.router, prefix="/api/doctors", tags=["Doctors"])
 
 
 @app.get("/")
