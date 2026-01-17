@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Header
 from typing import Optional
 from supabase import Client
-from app.core.database import get_db
+from app.core.database import get_db, get_supabase_admin_client
 from app.services.auth import AuthService
 from app.models import MagicLinkRequest, MagicLinkResponse, UserResponse
 
@@ -11,7 +11,8 @@ router = APIRouter()
 
 
 def get_auth_service(db: Client = Depends(get_db)) -> AuthService:
-    return AuthService(db)
+    admin_client = get_supabase_admin_client()
+    return AuthService(db, admin_client)
 
 
 def get_token_from_header(authorization: Optional[str] = Header(None)) -> str:

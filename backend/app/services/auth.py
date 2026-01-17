@@ -8,8 +8,10 @@ from app.core.config import settings
 
 class AuthService:
 
-    def __init__(self, supabase_client: Client):
+    def __init__(self, supabase_client: Client, admin_client: Client = None):
         self.client = supabase_client
+        # admin_client uses service_role key to bypass RLS for server-side operations
+        self.admin_client = admin_client or supabase_client
 
     def send_magic_link(self, request: MagicLinkRequest) -> MagicLinkResponse:
         try:
@@ -67,7 +69,7 @@ class AuthService:
     def _get_user_data(self, user_id: str) -> Dict[str, Any]:
         try:
             # Try to get existing user
-            result = self.client.table("users").select("*").eq("id", user_id).execute()
+            result = self.admin_client.table("users").select("*").eq("id", user_id).execute()
 
             if result.data and len(result.data) > 0:
                 return result.data[0]
@@ -79,7 +81,7 @@ class AuthService:
                 "role": "patient"
             }
 
-            insert_result = self.client.table("users").insert(new_user).execute()
+            insert_result = self.admin_client.table("users").insert(new_user).execute()
 
             if insert_result.data and len(insert_result.data) > 0:
                 return insert_result.data[0]
@@ -111,7 +113,7 @@ class AuthService:
                 "phone": phone
             }
 
-            result = self.client.table("patients").insert(patient_data).execute()
+            result = self.admin_client.table("patients").insert(patient_data).execute()
 
             if result.data and len(result.data) > 0:
                 return result.data[0]
