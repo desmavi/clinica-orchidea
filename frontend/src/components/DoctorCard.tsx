@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { Doctor } from '@/types';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,9 +8,16 @@ interface DoctorCardProps {
   onEdit?: (doctor: Doctor) => void;
   onDelete?: (doctor: Doctor) => void;
   showActions?: boolean;
+  showAvailabilityLink?: boolean;
 }
 
-export function DoctorCard({ doctor, onEdit, onDelete, showActions = false }: DoctorCardProps) {
+export function DoctorCard({
+  doctor,
+  onEdit,
+  onDelete,
+  showActions = false,
+  showAvailabilityLink = false
+}: DoctorCardProps) {
   const initials = `${doctor.first_name[0]}${doctor.last_name[0]}`.toUpperCase();
 
   return (
@@ -51,6 +59,20 @@ export function DoctorCard({ doctor, onEdit, onDelete, showActions = false }: Do
               </Button>
             )}
           </div>
+        </CardContent>
+      )}
+
+      {showAvailabilityLink && (
+        <CardContent className="pt-0">
+          <Link to={`/doctors/${doctor.id}`}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full bg-cyan-600 hover:bg-cyan-700 text-white border-0"
+            >
+              Vedi disponibilità
+            </Button>
+          </Link>
         </CardContent>
       )}
     </Card>

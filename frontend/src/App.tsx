@@ -2,7 +2,9 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { Login } from '@/pages/Login';
 import { Doctors } from '@/pages/Doctors';
+import { DoctorDetail } from '@/pages/DoctorDetail';
 import { DoctorsManagement } from '@/pages/admin/DoctorsManagement';
+import { AvailabilityManagement } from '@/pages/admin/AvailabilityManagement';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -24,9 +26,14 @@ function Layout({ children }: { children: ReactNode }) {
                 Dottori
               </Link>
               {isAdmin() && (
-                <Link to="/admin/doctors" className="text-sm hover:text-primary">
-                  Gestione Dottori
-                </Link>
+                <>
+                  <Link to="/admin/doctors" className="text-sm hover:text-primary">
+                    Gestione Dottori
+                  </Link>
+                  <Link to="/admin/availability" className="text-sm hover:text-primary">
+                    Disponibilità
+                  </Link>
+                </>
               )}
             </div>
           </div>
@@ -65,11 +72,18 @@ function HomePage() {
             </Button>
           </Link>
           {isAdmin() && (
-            <Link to="/admin/doctors">
-              <Button variant="outline" className="w-full justify-start">
-                Gestisci dottori
-              </Button>
-            </Link>
+            <>
+              <Link to="/admin/doctors">
+                <Button variant="outline" className="w-full justify-start">
+                  Gestisci dottori
+                </Button>
+              </Link>
+              <Link to="/admin/availability">
+                <Button variant="outline" className="w-full justify-start">
+                  Gestisci disponibilità
+                </Button>
+              </Link>
+            </>
           )}
         </div>
       </div>
@@ -110,6 +124,17 @@ function App() {
             }
           />
 
+          <Route
+            path="/doctors/:id"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <DoctorDetail />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
           {/* Admin routes */}
           <Route
             path="/admin/doctors"
@@ -117,6 +142,17 @@ function App() {
               <ProtectedRoute requireAdmin>
                 <Layout>
                   <DoctorsManagement />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/availability"
+            element={
+              <ProtectedRoute requireAdmin>
+                <Layout>
+                  <AvailabilityManagement />
                 </Layout>
               </ProtectedRoute>
             }
