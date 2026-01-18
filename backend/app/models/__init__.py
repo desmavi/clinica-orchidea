@@ -155,9 +155,16 @@ class AppointmentManualCreate(AppointmentCreate):
     Extends AppointmentCreate with additional admin-only fields.
     """
     patient_id: Optional[UUID] = Field(
-        None, 
+        None,
         description="Optional: link to existing patient account"
     )
+
+
+class AppointmentUpdate(BaseModel):
+    patient_first_name: Optional[str] = Field(None, min_length=1, max_length=100)
+    patient_last_name: Optional[str] = Field(None, min_length=1, max_length=100)
+    patient_phone: Optional[str] = Field(None, min_length=10, max_length=20)
+    patient_email: Optional[EmailStr] = None
 
 
 class AppointmentResponse(BaseModel):

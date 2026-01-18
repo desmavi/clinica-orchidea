@@ -5,6 +5,7 @@ import { doctorsApi } from '@/services/doctors';
 import { availabilityApi } from '@/services/availability';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { BookingModal } from '@/components/BookingModal';
 import toast from 'react-hot-toast';
 
 export function DoctorDetail() {
@@ -15,6 +16,7 @@ export function DoctorDetail() {
   const [slots, setSlots] = useState<AvailabilitySlot[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingSlots, setLoadingSlots] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState<AvailabilitySlot | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -82,6 +84,12 @@ export function DoctorDetail() {
     // Extract HH:MM directly from ISO string to avoid timezone conversion
     const timePart = dateString.split('T')[1];
     return timePart ? timePart.substring(0, 5) : '';
+  };
+
+  const handleBookingSuccess = () => {
+    setSelectedSlot(null);
+    fetchSlots();
+    fetchAvailableDates();
   };
 
   if (loading) {
@@ -188,8 +196,8 @@ export function DoctorDetail() {
                           key={slot.id}
                           variant="outline"
                           size="sm"
-                          className="text-center"
-                          disabled
+                          className="text-center hover:bg-cyan-50 hover:border-cyan-500"
+                          onClick={() => setSelectedSlot(slot)}
                         >
                           {formatTime(slot.start_time)}
                         </Button>
@@ -197,7 +205,7 @@ export function DoctorDetail() {
                     </div>
                   )}
                   <p className="text-xs text-muted-foreground mt-4">
-                    Seleziona un orario per aprire il modulo di prenotazione
+                    Clicca su un orario per prenotare
                   </p>
                 </div>
               </>
@@ -205,6 +213,15 @@ export function DoctorDetail() {
           </CardContent>
         </Card>
       </div>
+
+      {selectedSlot && doctor && (
+        <BookingModal
+          slot={selectedSlot}
+          doctor={doctor}
+          onClose={() => setSelectedSlot(null)}
+          onSuccess={handleBookingSuccess}
+        />
+      )}
     </div>
   );
 }

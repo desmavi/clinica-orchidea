@@ -38,7 +38,9 @@ class AvailabilityService:
                 .lte("start_time", f"{date_str}T23:59:59") \
                 .execute()
 
-            existing_times = {slot["start_time"] for slot in existing.data}
+            # Supabase returns timestamps with timezone (+00:00), we generate without and some slots weren't spotted as duplicated.
+            # Trim to 19 chars so we only compare the date/time part.
+            existing_times = {slot["start_time"][:19] for slot in existing.data}
 
             # Generate 30-minute slots, skipping duplicates
             slots_to_create = []
@@ -143,6 +145,20 @@ class AvailabilityService:
             # Check if slot exists
             self.get_by_id(slot_id)
 
+            # If trying to re-enable, check if slot has an active appointment
+            if is_available:
+                appointments = self.client.table("appointments") \
+                    .select("id") \
+                    .eq("slot_id", str(slot_id)) \
+                    .eq("status", "confirmed") \
+                    .execute()
+
+                if appointments.data and len(appointments.data) > 0:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Impossibile abilitare: questo slot ha un appuntamento attivo. Cancella prima l'appuntamento associato."
+                    )
+
             result = self.client.table("availability_slots") \
                 .update({"is_available": is_available}) \
                 .eq("id", str(slot_id)) \
@@ -169,6 +185,19 @@ class AvailabilityService:
         try:
             # Check if slot exists
             self.get_by_id(slot_id)
+
+            # Check if slot has an active appointment
+            appointments = self.client.table("appointments") \
+                .select("id") \
+                .eq("slot_id", str(slot_id)) \
+                .eq("status", "confirmed") \
+                .execute()
+
+            if appointments.data and len(appointments.data) > 0:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Impossibile eliminare: questo slot ha un appuntamento attivo. Cancella prima l'appuntamento."
+                )
 
             self.client.table("availability_slots") \
                 .delete() \

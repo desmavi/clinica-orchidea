@@ -103,9 +103,10 @@ export function AvailabilityManagement() {
       await availabilityApi.toggleAvailability(slot.id, !slot.is_available);
       toast.success(slot.is_available ? 'Slot disabilitato' : 'Slot abilitato');
       fetchSlots();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error toggling slot:', error);
-      toast.error('Errore nell\'aggiornamento dello slot');
+      const message = error.response?.data?.detail || 'Errore aggiornamento dello slot';
+      toast.error(message);
     }
   };
 
@@ -116,9 +117,10 @@ export function AvailabilityManagement() {
       await availabilityApi.deleteSlot(slotToDelete.id);
       toast.success('Slot eliminato');
       fetchSlots();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting slot:', error);
-      toast.error('Errore nell\'eliminazione dello slot');
+      const message = error.response?.data?.detail || 'Errore eliminazione dello slot';
+      toast.error(message);
     } finally {
       setSlotToDelete(null);
     }
@@ -273,7 +275,6 @@ export function AvailabilityManagement() {
         </Card>
       </div>
 
-      {/* Delete confirmation dialog */}
       <AlertDialog open={!!slotToDelete} onOpenChange={() => setSlotToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
