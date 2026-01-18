@@ -142,11 +142,12 @@ async def cancel_appointment(
 async def get_all_appointments(
     doctor_id: Optional[UUID] = Query(None, description="Filter by doctor"),
     date: Optional[str] = Query(None, description="Filter by date (YYYY-MM-DD)"),
+    date_end: Optional[str] = Query(None, description="End date for range filter (YYYY-MM-DD)"),
     status: Optional[str] = Query(None, description="Filter by status"),
     service: AppointmentService = Depends(get_appointment_service),
     _: UserResponse = Depends(require_admin)
 ):
-    return service.get_all(doctor_id, date, status)
+    return service.get_all(doctor_id, date, date_end, status)
 
 
 @router.post(

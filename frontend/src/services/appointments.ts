@@ -50,6 +50,7 @@ export const appointmentsApi = {
   getAll: async (params?: {
     doctor_id?: string;
     date?: string;
+    date_end?: string;
     status?: string;
   }): Promise<Appointment[]> => {
     const response = await apiClient.get<Appointment[]>('/appointments/admin/all', { params });

@@ -223,6 +223,7 @@ class AppointmentService:
         self,
         doctor_id: Optional[UUID] = None,
         date: Optional[str] = None,
+        date_end: Optional[str] = None,
         status_filter: Optional[str] = None
     ) -> List[AppointmentResponse]:
         """Get all appointments (admin only)."""
@@ -242,15 +243,22 @@ class AppointmentService:
             for apt in result.data:
                 slot = apt.get("availability_slots")
 
-                # Filter by date if specified
-                if date and slot:
+                # Filter by date or date range
+                if slot:
                     slot_date = slot["start_time"][:10]
-                    if slot_date != date:
-                        continue
+                    if date and date_end:
+                        if slot_date < date or slot_date > date_end:
+                            continue
+                    elif date:
+                        if slot_date != date:
+                            continue
 
                 appointments.append(
                     self._build_response(apt, slot, apt.get("doctors"))
                 )
+
+            # Sort by slot time ascending
+            appointments.sort(key=lambda x: x.slot.start_time if x.slot else "", reverse=False)
 
             return appointments
 
