@@ -20,11 +20,23 @@ export function EditAppointmentModal({ appointment, onClose, onSuccess }: EditAp
   const [email, setEmail] = useState(appointment.patient_email);
   const [loading, setLoading] = useState(false);
 
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const cleaned = e.target.value.replace(/[^\d+]/g, '');
+    setPhone(cleaned);
+  };
+
+  const getPhoneDigits = (value: string) => value.replace(/\D/g, '');
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!firstName || !lastName || !phone || !email) {
       toast.error('Compila tutti i campi');
+      return;
+    }
+
+    if (getPhoneDigits(phone).length < 10) {
+      toast.error('Il numero di telefono deve avere almeno 10 cifre');
       return;
     }
 
@@ -40,7 +52,10 @@ export function EditAppointmentModal({ appointment, onClose, onSuccess }: EditAp
       onSuccess();
     } catch (error: any) {
       console.error('Error updating appointment:', error);
-      const message = error.response?.data?.detail || 'Errore durante aggiornamento';
+      const detail = error.response?.data?.detail;
+      const message = Array.isArray(detail)
+        ? detail.map((d: any) => d.msg).join(', ')
+        : detail || 'Errore durante aggiornamento';
       toast.error(message);
     } finally {
       setLoading(false);
@@ -86,7 +101,7 @@ export function EditAppointmentModal({ appointment, onClose, onSuccess }: EditAp
                 id="phone"
                 type="tel"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={handlePhoneChange}
                 required
               />
             </div>

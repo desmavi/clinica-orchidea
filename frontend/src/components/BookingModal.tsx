@@ -37,11 +37,23 @@ export function BookingModal({ slot, doctor, onClose, onSuccess }: BookingModalP
     });
   };
 
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const cleaned = e.target.value.replace(/[^\d+]/g, '');
+    setPhone(cleaned);
+  };
+
+  const getPhoneDigits = (value: string) => value.replace(/\D/g, '');
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!firstName || !lastName || !phone || !email) {
       toast.error('Compila tutti i campi');
+      return;
+    }
+
+    if (getPhoneDigits(phone).length < 10) {
+      toast.error('Il numero di telefono deve avere almeno 10 cifre');
       return;
     }
 
@@ -58,7 +70,10 @@ export function BookingModal({ slot, doctor, onClose, onSuccess }: BookingModalP
       onSuccess();
     } catch (error: any) {
       console.error('Error booking appointment:', error);
-      const message = error.response?.data?.detail || 'Errore nella prenotazione';
+      const detail = error.response?.data?.detail;
+      const message = Array.isArray(detail)
+        ? detail.map((d: any) => d.msg).join(', ')
+        : detail || 'Errore nella prenotazione';
       toast.error(message);
     } finally {
       setLoading(false);
@@ -91,7 +106,7 @@ export function BookingModal({ slot, doctor, onClose, onSuccess }: BookingModalP
                   id="firstName"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="Mario"
+                  placeholder="es. Mario"
                   required
                 />
               </div>
@@ -101,7 +116,7 @@ export function BookingModal({ slot, doctor, onClose, onSuccess }: BookingModalP
                   id="lastName"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  placeholder="Rossi"
+                  placeholder="es. Rossi"
                   required
                 />
               </div>
@@ -113,8 +128,8 @@ export function BookingModal({ slot, doctor, onClose, onSuccess }: BookingModalP
                 id="phone"
                 type="tel"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+39 333 1234567"
+                onChange={handlePhoneChange}
+                placeholder="es. 3331234567"
                 required
               />
             </div>
@@ -126,7 +141,7 @@ export function BookingModal({ slot, doctor, onClose, onSuccess }: BookingModalP
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="mario.rossi@email.com"
+                placeholder="es. mario.rossi@email.com"
                 required
               />
             </div>
