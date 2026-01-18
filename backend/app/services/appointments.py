@@ -178,6 +178,47 @@ class AppointmentService:
                 detail=f"Errore nel recupero degli appuntamenti: {str(e)}"
             )
 
+    def get_by_id(
+        self,
+        appointment_id: UUID,
+        user_id: UUID,
+        is_admin: bool
+    ) -> AppointmentResponse:
+        """Get a single appointment by id. Patient can only get theirs, admin can get any."""
+        try:
+            result = self.client.table("appointments") \
+                .select("*, availability_slots(*), doctors(*)") \
+                .eq("id", str(appointment_id)) \
+                .execute()
+
+            if not result.data:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Appuntamento non trovato"
+                )
+
+            appointment = result.data[0]
+
+            if not is_admin and appointment.get("user_id") != str(user_id):
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Non puoi accedere ad appuntamenti di altri utenti"
+                )
+
+            return self._build_response(
+                appointment,
+                appointment.get("availability_slots"),
+                appointment.get("doctors")
+            )
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Errore nel recupero dell'appuntamento: {str(e)}"
+            )
+
     def get_all(
         self,
         doctor_id: Optional[UUID] = None,

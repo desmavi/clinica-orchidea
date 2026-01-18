@@ -16,12 +16,9 @@ class Settings(BaseSettings):
     # CORS
     cors_origins: str = "http://localhost:5173,http://localhost:3000"
     
-    # Email
-    smtp_host: str = "smtp.gmail.com"
-    smtp_port: int = 587
-    smtp_user: str = ""
-    smtp_password: str = ""
-    from_email: str = "noreply@clinicaorchidea.it"
+    # Resend
+    resend_api_key: str = ""
+    from_email: str = "noreply@clinicaorchidea.app"
     from_name: str = "Clinica Orchidea"
     
     # URLs

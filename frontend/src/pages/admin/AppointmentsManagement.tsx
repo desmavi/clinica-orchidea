@@ -83,9 +83,15 @@ export function AppointmentsManagement() {
     }
   };
 
-  const handleResendEmail = (apt: Appointment) => {
-    // TODO: email sending
-    toast.success('Email di conferma inviata a ' + apt.patient_email);
+  const handleResendEmail = async (apt: Appointment) => {
+    try {
+      await appointmentsApi.resendEmail(apt.id);
+      toast.success('Email di conferma inviata a ' + apt.patient_email);
+    } catch (error: any) {
+      console.error('Error sending email:', error);
+      const message = error.response?.data?.detail || 'Errore durante invio';
+      toast.error(message);
+    }
   };
 
   const handleEditSuccess = () => {

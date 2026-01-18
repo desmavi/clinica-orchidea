@@ -61,4 +61,9 @@ export const appointmentsApi = {
     const response = await apiClient.post<Appointment>('/appointments/admin/manual', data);
     return response.data;
   },
+
+  // Resend confirmation email
+  resendEmail: async (appointmentId: string): Promise<void> => {
+    await apiClient.post(`/appointments/${appointmentId}/resend-email`);
+  },
 };
