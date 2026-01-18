@@ -45,9 +45,8 @@ class AppointmentService:
                     detail="Slot non disponibile"
                 )
 
-            # Check slot is in the future (check datetime without timezone)
-            slot_time_str = slot["start_time"][:19]
-            slot_time = datetime.fromisoformat(slot_time_str)
+            # Check slot is in the future
+            slot_time = datetime.fromisoformat(slot["start_time"])
             if slot_time <= datetime.now():
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -363,8 +362,7 @@ class AppointmentService:
 
                 # Check if appointment is in the future
                 if slot:
-                    slot_time_str = slot["start_time"][:19]
-                    slot_time = datetime.fromisoformat(slot_time_str)
+                    slot_time = datetime.fromisoformat(slot["start_time"])
                     if slot_time <= datetime.now():
                         raise HTTPException(
                             status_code=status.HTTP_400_BAD_REQUEST,

@@ -38,9 +38,7 @@ class AvailabilityService:
                 .lte("start_time", f"{date_str}T23:59:59") \
                 .execute()
 
-            # Supabase returns timestamps with timezone (+00:00), we generate without and some slots weren't spotted as duplicated.
-            # Trim to 19 chars so we only compare the date/time part.
-            existing_times = {slot["start_time"][:19] for slot in existing.data}
+            existing_times = {slot["start_time"] for slot in existing.data}
 
             # Generate 30-minute slots, skipping duplicates
             slots_to_create = []
