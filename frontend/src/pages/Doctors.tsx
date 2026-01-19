@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Doctor } from '@/types';
 import { doctorsApi } from '@/services/doctors';
 import { DoctorCard } from '@/components/DoctorCard';
@@ -10,6 +11,7 @@ export function Doctors() {
   const [specializations, setSpecializations] = useState<string[]>([]);
   const [selectedSpecialization, setSelectedSpecialization] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   // Fetch doctors and specializations
   useEffect(() => {
@@ -38,7 +40,7 @@ export function Doctors() {
       setDoctors(data);
     } catch (error) {
       console.error('Error fetching doctors:', error);
-      toast.error('Errore nel caricamento dei dottori');
+      toast.error(t('errors.loadingDoctors'));
     } finally {
       setLoading(false);
     }
@@ -48,9 +50,9 @@ export function Doctors() {
     <div className="min-h-screen bg-background">
       <div className="border-b">
         <div className="container mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold">I Nostri Dottori</h1>
+          <h1 className="text-3xl font-bold">{t('doctors.title')}</h1>
           <p className="text-muted-foreground mt-2">
-            Scopri il nostro team di specialisti
+            {t('doctors.subtitle')}
           </p>
         </div>
       </div>
@@ -62,7 +64,7 @@ export function Doctors() {
             size="sm"
             onClick={() => setSelectedSpecialization('')}
           >
-            Tutti
+            {t('common.all')}
           </Button>
           {specializations.map((spec) => (
             <Button
@@ -78,11 +80,11 @@ export function Doctors() {
 
         {loading ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">Caricamento...</p>
+            <p className="text-muted-foreground">{t('common.loading')}</p>
           </div>
         ) : doctors.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">Nessun dottore trovato</p>
+            <p className="text-muted-foreground">{t('doctors.noDoctors')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

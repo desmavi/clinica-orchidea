@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Doctor } from '@/types';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,7 @@ export function DoctorCard({
   showAvailabilityLink = false
 }: DoctorCardProps) {
   const initials = `${doctor.first_name[0]}${doctor.last_name[0]}`.toUpperCase();
+  const { t } = useTranslation();
 
   return (
     <Card className="overflow-hidden">
@@ -38,7 +40,7 @@ export function DoctorCard({
 
           <div className="flex-1">
             <h3 className="text-lg font-semibold">
-              Dr. {doctor.first_name} {doctor.last_name}
+              {t('doctors.drPrefix')} {doctor.first_name} {doctor.last_name}
             </h3>
             <p className="text-sm text-muted-foreground">{doctor.specialization}</p>
           </div>
@@ -50,12 +52,12 @@ export function DoctorCard({
           <div className="flex gap-2 justify-end">
             {onEdit && (
               <Button variant="outline" size="sm" onClick={() => onEdit(doctor)}>
-                Modifica
+                {t('common.edit')}
               </Button>
             )}
             {onDelete && (
               <Button variant="destructive" size="sm" onClick={() => onDelete(doctor)}>
-                Elimina
+                {t('common.delete')}
               </Button>
             )}
           </div>
@@ -70,7 +72,7 @@ export function DoctorCard({
               size="sm"
               className="w-full bg-cyan-600 hover:bg-cyan-700 text-white border-0"
             >
-              Vedi disponibilità
+              {t('doctors.viewAvailability')}
             </Button>
           </Link>
         </CardContent>

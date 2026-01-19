@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Doctor, DoctorCreate } from '@/types';
 import { storageService } from '@/services/storage';
 import { Button } from '@/components/ui/button';
@@ -26,6 +27,7 @@ export function DoctorForm({ doctor, onSubmit, onCancel, loading = false }: Doct
   const [uploading, setUploading] = useState(false);
   const [photoRemoved, setPhotoRemoved] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { t } = useTranslation();
 
   const isEditing = !!doctor;
 
@@ -54,13 +56,13 @@ export function DoctorForm({ doctor, onSubmit, onCancel, loading = false }: Doct
     // Validate file type
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
     if (!allowedTypes.includes(file.type)) {
-      toast.error('Tipo file non supportato. Usa JPG, JPEG, PNG o WebP.');
+      toast.error(t('errors.unsupportedFileType'));
       return;
     }
 
     // Validate file size (1MB)
     if (file.size > 1 * 1024 * 1024) {
-      toast.error('File troppo grande. Massimo 1MB.');
+      toast.error(t('errors.fileTooLarge'));
       return;
     }
 
@@ -101,7 +103,7 @@ export function DoctorForm({ doctor, onSubmit, onCancel, loading = false }: Doct
         photoUrl = result.url;
       } catch (error) {
         console.error('Upload error:', error);
-        toast.error('Errore nel caricamento della foto');
+        toast.error(t('errors.uploadingPhoto'));
         setUploading(false);
         return;
       }
@@ -119,53 +121,60 @@ export function DoctorForm({ doctor, onSubmit, onCancel, loading = false }: Doct
 
   const isLoading = loading || uploading;
 
+  const getSubmitButtonText = () => {
+    if (uploading) return t('doctorForm.uploadingPhoto');
+    if (loading) return t('doctorForm.saving');
+    if (isEditing) return t('doctorForm.saveChanges');
+    return t('doctorForm.createDoctor');
+  };
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{isEditing ? 'Modifica Dottore' : 'Nuovo Dottore'}</CardTitle>
+        <CardTitle>{isEditing ? t('doctorForm.titleEdit') : t('doctorForm.titleNew')}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="first_name">Nome</Label>
+              <Label htmlFor="first_name">{t('common.firstName')}</Label>
               <Input
                 id="first_name"
                 name="first_name"
                 value={formData.first_name}
                 onChange={handleChange}
                 required
-                placeholder="Mario"
+                placeholder={t('placeholders.firstName')}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="last_name">Cognome</Label>
+              <Label htmlFor="last_name">{t('common.lastName')}</Label>
               <Input
                 id="last_name"
                 name="last_name"
                 value={formData.last_name}
                 onChange={handleChange}
                 required
-                placeholder="Rossi"
+                placeholder={t('placeholders.lastName')}
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="specialization">Specializzazione</Label>
+            <Label htmlFor="specialization">{t('doctorForm.specialization')}</Label>
             <Input
               id="specialization"
               name="specialization"
               value={formData.specialization}
               onChange={handleChange}
               required
-              placeholder="Cardiologia"
+              placeholder={t('placeholders.specialization')}
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Foto Profilo</Label>
+            <Label>{t('doctorForm.profilePhoto')}</Label>
             <div className="flex items-start gap-4">
               <div className="w-24 h-24 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-gray-50">
                 {previewUrl ? (
@@ -176,7 +185,7 @@ export function DoctorForm({ doctor, onSubmit, onCancel, loading = false }: Doct
                   />
                 ) : (
                   <span className="text-gray-400 text-xs text-center px-2">
-                    Nessuna foto
+                    {t('doctorForm.noPhoto')}
                   </span>
                 )}
               </div>
@@ -197,7 +206,7 @@ export function DoctorForm({ doctor, onSubmit, onCancel, loading = false }: Doct
                     size="sm"
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    {previewUrl ? 'Cambia foto' : 'Carica foto'}
+                    {previewUrl ? t('doctorForm.changePhoto') : t('doctorForm.uploadPhoto')}
                   </Button>
                   {previewUrl && (
                     <Button
@@ -207,12 +216,12 @@ export function DoctorForm({ doctor, onSubmit, onCancel, loading = false }: Doct
                       onClick={handleRemovePhoto}
                       className="text-red-600 hover:text-red-700"
                     >
-                      Rimuovi
+                      {t('doctorForm.removePhoto')}
                     </Button>
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  JPG, PNG o WebP. Max 5MB.
+                  {t('doctorForm.photoHint')}
                 </p>
               </div>
             </div>
@@ -220,10 +229,10 @@ export function DoctorForm({ doctor, onSubmit, onCancel, loading = false }: Doct
 
           <div className="flex gap-2 justify-end pt-4">
             <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
-              Annulla
+              {t('common.cancel')}
             </Button>
             <Button type="submit" disabled={isLoading} className="bg-cyan-600 hover:bg-cyan-700 text-white">
-              {uploading ? 'Caricamento foto...' : loading ? 'Salvataggio...' : isEditing ? 'Salva Modifiche' : 'Crea Dottore'}
+              {getSubmitButtonText()}
             </Button>
           </div>
         </form>

@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 
 interface ProtectedRouteProps {
@@ -12,6 +13,7 @@ export function ProtectedRoute({
   requireAdmin = false,
 }: ProtectedRouteProps) {
   const { isAuthenticated, loading, isAdmin } = useAuth();
+  const { t } = useTranslation();
 
   // Show loading state while checking authentication
   if (loading) {
@@ -19,7 +21,7 @@ export function ProtectedRoute({
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-muted-foreground">Caricamento...</p>
+          <p className="text-muted-foreground">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -50,9 +52,9 @@ export function ProtectedRoute({
               />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold">Accesso Negato</h1>
+          <h1 className="text-2xl font-bold">{t('protected.accessDenied')}</h1>
           <p className="text-muted-foreground">
-            Non hai i permessi necessari per accedere a questa pagina.
+            {t('protected.noPermission')}
           </p>
         </div>
       </div>

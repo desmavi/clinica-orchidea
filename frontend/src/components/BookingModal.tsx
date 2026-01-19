@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AvailabilitySlot, Doctor } from '@/types';
 import { appointmentsApi } from '@/services/appointments';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ export function BookingModal({ slot, doctor, onClose, onSuccess }: BookingModalP
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
 
   const formatTime = (dateString: string) => {
     const timePart = dateString.split('T')[1];
@@ -48,12 +50,12 @@ export function BookingModal({ slot, doctor, onClose, onSuccess }: BookingModalP
     e.preventDefault();
 
     if (!firstName || !lastName || !phone || !email) {
-      toast.error('Compila tutti i campi');
+      toast.error(t('errors.fillAllFields'));
       return;
     }
 
     if (getPhoneDigits(phone).length < 10) {
-      toast.error('Il numero di telefono deve avere almeno 10 cifre');
+      toast.error(t('errors.phoneMinDigits'));
       return;
     }
 
@@ -66,14 +68,14 @@ export function BookingModal({ slot, doctor, onClose, onSuccess }: BookingModalP
         patient_phone: phone,
         patient_email: email,
       });
-      toast.success('Appuntamento prenotato con successo!');
+      toast.success(t('booking.success'));
       onSuccess();
     } catch (error: any) {
       console.error('Error booking appointment:', error);
       const detail = error.response?.data?.detail;
       const message = Array.isArray(detail)
         ? detail.map((d: any) => d.msg).join(', ')
-        : detail || 'Errore nella prenotazione';
+        : detail || t('errors.booking');
       toast.error(message);
     } finally {
       setLoading(false);
@@ -88,12 +90,12 @@ export function BookingModal({ slot, doctor, onClose, onSuccess }: BookingModalP
       />
       <Card className="relative z-10 w-full max-w-md mx-4">
         <CardHeader>
-          <CardTitle>Prenota Appuntamento</CardTitle>
+          <CardTitle>{t('booking.title')}</CardTitle>
           <div className="text-sm text-muted-foreground space-y-1">
-            <p>Dr. {doctor.first_name} {doctor.last_name} - {doctor.specialization}</p>
+            <p>{t('doctors.drPrefix')} {doctor.first_name} {doctor.last_name} - {doctor.specialization}</p>
             <p>{formatDate(slot.start_time)}</p>
             <p className="font-medium text-foreground">
-              Ore {formatTime(slot.start_time)} - {formatTime(slot.end_time)}
+              {t('booking.hours')} {formatTime(slot.start_time)} - {formatTime(slot.end_time)}
             </p>
           </div>
         </CardHeader>
@@ -101,53 +103,53 @@ export function BookingModal({ slot, doctor, onClose, onSuccess }: BookingModalP
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName">Nome *</Label>
+                <Label htmlFor="firstName">{t('common.firstName')} {t('common.required')}</Label>
                 <Input
                   id="firstName"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="es. Mario"
+                  placeholder={t('placeholders.firstName')}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName">Cognome *</Label>
+                <Label htmlFor="lastName">{t('common.lastName')} {t('common.required')}</Label>
                 <Input
                   id="lastName"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  placeholder="es. Rossi"
+                  placeholder={t('placeholders.lastName')}
                   required
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone">Telefono *</Label>
+              <Label htmlFor="phone">{t('common.phone')} {t('common.required')}</Label>
               <Input
                 id="phone"
                 type="tel"
                 value={phone}
                 onChange={handlePhoneChange}
-                placeholder="es. 3331234567"
+                placeholder={t('placeholders.phone')}
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
+              <Label htmlFor="email">{t('common.email')} {t('common.required')}</Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="es. mario.rossi@email.com"
+                placeholder={t('placeholders.email')}
                 required
               />
             </div>
 
             <p className="text-xs text-muted-foreground">
-              I dati inseriti si riferiscono alla persona che effettuerà la visita
+              {t('booking.patientDataHint')}
             </p>
 
             <div className="flex gap-3 pt-2">
@@ -158,14 +160,14 @@ export function BookingModal({ slot, doctor, onClose, onSuccess }: BookingModalP
                 className="flex-1"
                 disabled={loading}
               >
-                Annulla
+                {t('common.cancel')}
               </Button>
               <Button
                 type="submit"
                 disabled={loading}
                 className="flex-1 bg-cyan-600 hover:bg-cyan-700 text-white"
               >
-                {loading ? 'Prenotazione...' : 'Conferma'}
+                {loading ? t('booking.submitting') : t('common.confirm')}
               </Button>
             </div>
           </form>

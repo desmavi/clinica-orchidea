@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Doctor, AvailabilitySlot } from '@/types';
 import { doctorsApi } from '@/services/doctors';
 import { availabilityApi } from '@/services/availability';
@@ -17,6 +18,7 @@ export function DoctorDetail() {
   const [loading, setLoading] = useState(true);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<AvailabilitySlot | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (id) {
@@ -39,7 +41,7 @@ export function DoctorDetail() {
       setDoctor(data);
     } catch (error) {
       console.error('Error fetching doctor:', error);
-      toast.error('Errore nel caricamento del dottore');
+      toast.error(t('errors.loadingDoctor'));
     } finally {
       setLoading(false);
     }
@@ -65,7 +67,7 @@ export function DoctorDetail() {
       setSlots(data);
     } catch (error) {
       console.error('Error fetching slots:', error);
-      toast.error('Errore nel caricamento degli slot');
+      toast.error(t('errors.loadingSlots'));
     } finally {
       setLoadingSlots(false);
     }
@@ -95,7 +97,7 @@ export function DoctorDetail() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-12">
-        <p className="text-center text-muted-foreground">Caricamento...</p>
+        <p className="text-center text-muted-foreground">{t('common.loading')}</p>
       </div>
     );
   }
@@ -103,10 +105,10 @@ export function DoctorDetail() {
   if (!doctor) {
     return (
       <div className="container mx-auto px-4 py-12">
-        <p className="text-center text-muted-foreground">Dottore non trovato</p>
+        <p className="text-center text-muted-foreground">{t('doctors.notFound')}</p>
         <div className="text-center mt-4">
           <Link to="/doctors">
-            <Button variant="outline">Torna alla lista</Button>
+            <Button variant="outline">{t('doctors.backToList')}</Button>
           </Link>
         </div>
       </div>
@@ -120,7 +122,7 @@ export function DoctorDetail() {
       <div className="mb-6">
         <Link to="/doctors">
           <Button variant="ghost" size="sm">
-            ← Torna alla lista
+            ← {t('doctors.backToList')}
           </Button>
         </Link>
       </div>
@@ -141,7 +143,7 @@ export function DoctorDetail() {
                 </div>
               )}
               <h1 className="text-2xl font-bold">
-                Dr. {doctor.first_name} {doctor.last_name}
+                {t('doctors.drPrefix')} {doctor.first_name} {doctor.last_name}
               </h1>
               <p className="text-muted-foreground mt-1">{doctor.specialization}</p>
             </div>
@@ -151,19 +153,18 @@ export function DoctorDetail() {
         {/* Availability */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Disponibilità</CardTitle>
-            <p className="text-xs text-muted-foreground">Orari in ora italiana</p>
+            <CardTitle>{t('doctorDetail.availability')}</CardTitle>
+            <p className="text-xs text-muted-foreground">{t('doctorDetail.timezoneHint')}</p>
           </CardHeader>
           <CardContent>
             {availableDates.length === 0 ? (
               <p className="text-muted-foreground text-center py-8">
-                Nessuna disponibilità al momento
+                {t('doctorDetail.noAvailability')}
               </p>
             ) : (
               <>
-                {/* Date selection */}
                 <div className="mb-6">
-                  <p className="text-sm text-muted-foreground mb-3">Seleziona una data:</p>
+                  <p className="text-sm text-muted-foreground mb-3">{t('doctorDetail.selectDate')}</p>
                   <div className="flex flex-wrap gap-2">
                     {availableDates.map((date) => (
                       <Button
@@ -181,13 +182,13 @@ export function DoctorDetail() {
 
                 <div>
                   <p className="text-sm text-muted-foreground mb-3">
-                    Orari disponibili per {formatDate(selectedDate)}:
+                    {t('doctorDetail.availableSlots', { date: formatDate(selectedDate) })}
                   </p>
                   {loadingSlots ? (
-                    <p className="text-muted-foreground text-center py-4">Caricamento...</p>
+                    <p className="text-muted-foreground text-center py-4">{t('common.loading')}</p>
                   ) : slots.length === 0 ? (
                     <p className="text-muted-foreground text-center py-4">
-                      Nessuno slot disponibile per questa data
+                      {t('doctorDetail.noSlots')}
                     </p>
                   ) : (
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
@@ -205,7 +206,7 @@ export function DoctorDetail() {
                     </div>
                   )}
                   <p className="text-xs text-muted-foreground mt-4">
-                    Clicca su un orario per prenotare
+                    {t('doctorDetail.clickToBook')}
                   </p>
                 </div>
               </>

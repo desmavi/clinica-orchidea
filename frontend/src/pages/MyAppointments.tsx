@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Appointment } from '@/types';
 import { appointmentsApi } from '@/services/appointments';
 import { Card, CardContent } from '@/components/ui/card';
@@ -21,6 +22,7 @@ export function MyAppointments() {
   const [loading, setLoading] = useState(true);
   const [appointmentToCancel, setAppointmentToCancel] = useState<Appointment | null>(null);
   const [appointmentToEdit, setAppointmentToEdit] = useState<Appointment | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     fetchAppointments();
@@ -32,7 +34,7 @@ export function MyAppointments() {
       setAppointments(data);
     } catch (error) {
       console.error('Error fetching appointments:', error);
-      toast.error('Errore nel caricamento degli appuntamenti');
+      toast.error(t('errors.loadingAppointments'));
     } finally {
       setLoading(false);
     }
@@ -43,11 +45,11 @@ export function MyAppointments() {
 
     try {
       await appointmentsApi.cancel(appointmentToCancel.id);
-      toast.success('Appuntamento cancellato');
+      toast.success(t('appointments.appointmentCancelled'));
       fetchAppointments();
     } catch (error: any) {
       console.error('Error cancelling appointment:', error);
-      const message = error.response?.data?.detail || 'Errore nella cancellazione';
+      const message = error.response?.data?.detail || t('errors.cancelling');
       toast.error(message);
     } finally {
       setAppointmentToCancel(null);
@@ -57,10 +59,10 @@ export function MyAppointments() {
   const handleResendEmail = async (apt: Appointment) => {
     try {
       await appointmentsApi.resendEmail(apt.id);
-      toast.success('Email di conferma inviata a ' + apt.patient_email);
+      toast.success(t('appointments.emailSentTo') + ' ' + apt.patient_email);
     } catch (error: any) {
       console.error('Error sending email:', error);
-      const message = error.response?.data?.detail || 'Errore durante invio email';
+      const message = error.response?.data?.detail || t('errors.sendingEmail');
       toast.error(message);
     }
   };
@@ -100,7 +102,7 @@ export function MyAppointments() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-12">
-        <p className="text-center text-muted-foreground">Caricamento...</p>
+        <p className="text-center text-muted-foreground">{t('common.loading')}</p>
       </div>
     );
   }
@@ -108,15 +110,15 @@ export function MyAppointments() {
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">I Miei Appuntamenti</h1>
-        <p className="text-muted-foreground">Visualizza e gestisci le tue prenotazioni</p>
+        <h1 className="text-2xl font-bold">{t('appointments.title')}</h1>
+        <p className="text-muted-foreground">{t('appointments.subtitle')}</p>
       </div>
 
       {appointments.length === 0 ? (
         <Card>
           <CardContent className="py-12">
             <p className="text-center text-muted-foreground">
-              Non hai ancora prenotato appuntamenti
+              {t('appointments.noAppointments')}
             </p>
           </CardContent>
         </Card>
@@ -124,7 +126,7 @@ export function MyAppointments() {
         <div className="space-y-6">
           {upcomingAppointments.length > 0 && (
             <div>
-              <h2 className="text-lg font-semibold mb-3">Prossimi appuntamenti</h2>
+              <h2 className="text-lg font-semibold mb-3">{t('appointments.upcoming')}</h2>
               <div className="space-y-3">
                 {upcomingAppointments.map((apt) => {
                   const { date, time } = apt.slot
@@ -137,23 +139,23 @@ export function MyAppointments() {
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                           <div>
                             <p className="font-medium">
-                              Dr. {apt.doctor?.first_name} {apt.doctor?.last_name}
+                              {t('doctors.drPrefix')} {apt.doctor?.first_name} {apt.doctor?.last_name}
                             </p>
                             <p className="text-sm text-muted-foreground">
                               {apt.doctor?.specialization}
                             </p>
                             <p className="text-sm mt-1">
-                              {date} alle ore <span className="font-medium">{time}</span>
+                              {date} {t('appointments.atTime')} <span className="font-medium">{time}</span>
                             </p>
                             <p className="text-xs text-muted-foreground mt-1">
-                              Paziente: {apt.patient_first_name} {apt.patient_last_name}
+                              {t('appointments.patientLabel')} {apt.patient_first_name} {apt.patient_last_name}
                             </p>
                           </div>
                           <div className="flex gap-2">
                             <button
                               onClick={() => handleResendEmail(apt)}
                               className="p-2 text-gray-500 hover:text-cyan-600"
-                              title="Rinvia email di conferma"
+                              title={t('appointments.resendEmail')}
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <rect width="20" height="16" x="2" y="4" rx="2"/>
@@ -165,7 +167,7 @@ export function MyAppointments() {
                               size="sm"
                               onClick={() => setAppointmentToEdit(apt)}
                             >
-                              Modifica
+                              {t('common.edit')}
                             </Button>
                             <Button
                               variant="outline"
@@ -173,7 +175,7 @@ export function MyAppointments() {
                               className="text-red-600 hover:text-red-700"
                               onClick={() => setAppointmentToCancel(apt)}
                             >
-                              Cancella
+                              {t('common.cancel')}
                             </Button>
                           </div>
                         </div>
@@ -187,7 +189,7 @@ export function MyAppointments() {
 
           {pastAppointments.length > 0 && (
             <div>
-              <h2 className="text-lg font-semibold mb-3">Storico</h2>
+              <h2 className="text-lg font-semibold mb-3">{t('appointments.history')}</h2>
               <div className="space-y-3">
                 {pastAppointments.map((apt) => {
                   const { date, time } = apt.slot
@@ -200,16 +202,16 @@ export function MyAppointments() {
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                           <div>
                             <p className="font-medium">
-                              Dr. {apt.doctor?.first_name} {apt.doctor?.last_name}
+                              {t('doctors.drPrefix')} {apt.doctor?.first_name} {apt.doctor?.last_name}
                             </p>
                             <p className="text-sm text-muted-foreground">
                               {apt.doctor?.specialization}
                             </p>
                             <p className="text-sm mt-1">
-                              {date} alle ore {time}
+                              {date} {t('appointments.atTime')} {time}
                             </p>
                             <p className="text-xs text-muted-foreground mt-1">
-                              Paziente: {apt.patient_first_name} {apt.patient_last_name}
+                              {t('appointments.patientLabel')} {apt.patient_first_name} {apt.patient_last_name}
                             </p>
                           </div>
                           <span
@@ -219,7 +221,7 @@ export function MyAppointments() {
                                 : 'bg-gray-100 text-gray-700'
                             }`}
                           >
-                            {apt.status === 'cancelled' ? 'Cancellato' : 'Completato'}
+                            {apt.status === 'cancelled' ? t('appointments.cancelled') : t('appointments.completed')}
                           </span>
                         </div>
                       </CardContent>
@@ -235,24 +237,24 @@ export function MyAppointments() {
       <AlertDialog open={!!appointmentToCancel} onOpenChange={() => setAppointmentToCancel(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Conferma cancellazione</AlertDialogTitle>
+            <AlertDialogTitle>{t('dialogs.confirmCancel')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Sei sicuro di voler cancellare questo appuntamento?
+              {t('dialogs.cancelAppointment')}
               {appointmentToCancel?.doctor && (
                 <>
                   <br />
-                  Dr. {appointmentToCancel.doctor.first_name} {appointmentToCancel.doctor.last_name}
+                  {t('doctors.drPrefix')} {appointmentToCancel.doctor.first_name} {appointmentToCancel.doctor.last_name}
                 </>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annulla</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleCancelConfirm}
               className="bg-red-600 hover:bg-red-700"
             >
-              Cancella appuntamento
+              {t('appointments.cancelAppointment')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

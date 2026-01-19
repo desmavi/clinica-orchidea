@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Appointment, Doctor } from '@/types';
 import { appointmentsApi } from '@/services/appointments';
 import { doctorsApi } from '@/services/doctors';
@@ -45,6 +46,7 @@ export function AppointmentsManagement() {
   const [appointmentToCancel, setAppointmentToCancel] = useState<Appointment | null>(null);
   const [appointmentToEdit, setAppointmentToEdit] = useState<Appointment | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   // Filters
   const [selectedDoctorId, setSelectedDoctorId] = useState<string>('');
@@ -109,7 +111,7 @@ export function AppointmentsManagement() {
       setAppointments(data);
     } catch (error) {
       console.error('Error fetching appointments:', error);
-      toast.error('Errore nel caricamento degli appuntamenti');
+      toast.error(t('errors.loadingAppointments'));
     } finally {
       setLoading(false);
     }
@@ -120,11 +122,11 @@ export function AppointmentsManagement() {
 
     try {
       await appointmentsApi.cancel(appointmentToCancel.id);
-      toast.success('Appuntamento cancellato');
+      toast.success(t('appointments.appointmentCancelled'));
       fetchAppointments();
     } catch (error: any) {
       console.error('Error cancelling appointment:', error);
-      const message = error.response?.data?.detail || 'Errore nella cancellazione';
+      const message = error.response?.data?.detail || t('errors.cancelling');
       toast.error(message);
     } finally {
       setAppointmentToCancel(null);
@@ -134,10 +136,10 @@ export function AppointmentsManagement() {
   const handleResendEmail = async (apt: Appointment) => {
     try {
       await appointmentsApi.resendEmail(apt.id);
-      toast.success('Email di conferma inviata a ' + apt.patient_email);
+      toast.success(t('appointments.emailSentTo') + ' ' + apt.patient_email);
     } catch (error: any) {
       console.error('Error sending email:', error);
-      const message = error.response?.data?.detail || 'Errore durante invio';
+      const message = error.response?.data?.detail || t('errors.sendingEmail');
       toast.error(message);
     }
   };
@@ -175,9 +177,9 @@ export function AppointmentsManagement() {
 
   const getFilterLabel = () => {
     const parts: string[] = [];
-    if (quickDateFilter === 'oggi') parts.push('Oggi');
-    else if (quickDateFilter === 'domani') parts.push('Domani');
-    else if (quickDateFilter === 'settimana') parts.push('Prossimi 7 giorni');
+    if (quickDateFilter === 'oggi') parts.push(t('appointmentsAdmin.today'));
+    else if (quickDateFilter === 'domani') parts.push(t('appointmentsAdmin.tomorrow'));
+    else if (quickDateFilter === 'settimana') parts.push(t('appointmentsAdmin.nextWeek'));
     else if (selectedDate) {
       const d = new Date(selectedDate + 'T00:00:00');
       parts.push(d.toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }));
@@ -185,26 +187,26 @@ export function AppointmentsManagement() {
 
     if (selectedDoctorId) {
       const doc = doctors.find(d => d.id === selectedDoctorId);
-      if (doc) parts.push(`Dr. ${doc.first_name} ${doc.last_name}`);
+      if (doc) parts.push(`${t('doctors.drPrefix')} ${doc.first_name} ${doc.last_name}`);
     }
 
-    return parts.length > 0 ? parts.join(' - ') : 'Tutti gli appuntamenti';
+    return parts.length > 0 ? parts.join(' - ') : t('appointmentsAdmin.allAppointments');
   };
 
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="mb-6 print:hidden">
-        <h1 className="text-2xl font-bold">Gestione Appuntamenti</h1>
-        <p className="text-muted-foreground">Visualizza e gestisci tutti gli appuntamenti</p>
+        <h1 className="text-2xl font-bold">{t('appointmentsAdmin.title')}</h1>
+        <p className="text-muted-foreground">{t('appointmentsAdmin.subtitle')}</p>
       </div>
 
       <Card className="mb-6 print:hidden">
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Filtri</CardTitle>
+          <CardTitle className="text-lg">{t('appointmentsAdmin.filters')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label className="text-sm text-muted-foreground">Periodo</Label>
+            <Label className="text-sm text-muted-foreground">{t('appointmentsAdmin.period')}</Label>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => handleQuickDateFilter('oggi')}
@@ -214,7 +216,7 @@ export function AppointmentsManagement() {
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                Oggi
+                {t('appointmentsAdmin.today')}
               </button>
               <button
                 onClick={() => handleQuickDateFilter('domani')}
@@ -224,7 +226,7 @@ export function AppointmentsManagement() {
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                Domani
+                {t('appointmentsAdmin.tomorrow')}
               </button>
               <button
                 onClick={() => handleQuickDateFilter('settimana')}
@@ -234,7 +236,7 @@ export function AppointmentsManagement() {
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                Prossimi 7 giorni
+                {t('appointmentsAdmin.nextWeek')}
               </button>
               <button
                 onClick={() => handleQuickDateFilter('')}
@@ -244,14 +246,14 @@ export function AppointmentsManagement() {
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                Tutti
+                {t('common.all')}
               </button>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
             <div className="space-y-2">
-              <Label>Data specifica</Label>
+              <Label>{t('appointmentsAdmin.specificDate')}</Label>
               <Input
                 type="date"
                 value={quickDateFilter === 'custom' ? selectedDate : ''}
@@ -264,37 +266,37 @@ export function AppointmentsManagement() {
             </div>
 
             <div className="space-y-2">
-              <Label>Dottore</Label>
+              <Label>{t('common.doctor')}</Label>
               <select
                 value={selectedDoctorId}
                 onChange={(e) => setSelectedDoctorId(e.target.value)}
                 className="w-full h-10 px-3 rounded-md border border-input bg-background"
               >
-                <option value="">Tutti i dottori</option>
+                <option value="">{t('appointmentsAdmin.allDoctors')}</option>
                 {doctors.map((doctor) => (
                   <option key={doctor.id} value={doctor.id}>
-                    Dr. {doctor.first_name} {doctor.last_name}
+                    {t('doctors.drPrefix')} {doctor.first_name} {doctor.last_name}
                   </option>
                 ))}
               </select>
             </div>
 
             <div className="space-y-2">
-              <Label>Stato</Label>
+              <Label>{t('common.status')}</Label>
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
                 className="w-full h-10 px-3 rounded-md border border-input bg-background"
               >
-                <option value="">Tutti</option>
-                <option value="confirmed">Confermato</option>
-                <option value="cancelled">Cancellato</option>
+                <option value="">{t('appointmentsAdmin.allStatuses')}</option>
+                <option value="confirmed">{t('appointments.confirmed')}</option>
+                <option value="cancelled">{t('appointments.cancelled')}</option>
               </select>
             </div>
 
             <div className="flex items-end">
               <Button variant="outline" onClick={clearFilters} className="w-full">
-                Pulisci filtri
+                {t('common.clearFilters')}
               </Button>
             </div>
           </div>
@@ -305,7 +307,7 @@ export function AppointmentsManagement() {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-lg">
-              Appuntamenti ({appointments.length})
+              {t('appointmentsAdmin.appointmentsCount', { count: appointments.length })}
             </CardTitle>
             <p className="text-sm text-muted-foreground mt-1">{getFilterLabel()}</p>
           </div>
@@ -320,15 +322,15 @@ export function AppointmentsManagement() {
               <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
               <rect width="12" height="8" x="6" y="14"/>
             </svg>
-            Stampa
+            {t('common.print')}
           </Button>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <p className="text-center text-muted-foreground py-8">Caricamento...</p>
+            <p className="text-center text-muted-foreground py-8">{t('common.loading')}</p>
           ) : appointments.length === 0 ? (
             <p className="text-center text-muted-foreground py-8">
-              Nessun appuntamento trovato
+              {t('appointmentsAdmin.noAppointments')}
             </p>
           ) : (
             <div className="space-y-3">
@@ -348,26 +350,26 @@ export function AppointmentsManagement() {
                   >
                     <div className="flex-1 grid grid-cols-1 sm:grid-cols-4 gap-2">
                       <div>
-                        <p className="text-xs text-muted-foreground">Data/Ora</p>
+                        <p className="text-xs text-muted-foreground">{t('appointmentsAdmin.dateTime')}</p>
                         <p className="font-medium">
                           {date} - {time}
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-muted-foreground">Dottore</p>
+                        <p className="text-xs text-muted-foreground">{t('common.doctor')}</p>
                         <p>
-                          Dr. {apt.doctor?.first_name} {apt.doctor?.last_name}
+                          {t('doctors.drPrefix')} {apt.doctor?.first_name} {apt.doctor?.last_name}
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-muted-foreground">Paziente</p>
+                        <p className="text-xs text-muted-foreground">{t('common.patient')}</p>
                         <p>
                           {apt.patient_first_name} {apt.patient_last_name}
                         </p>
                         <p className="text-xs text-muted-foreground">{apt.patient_phone}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-muted-foreground">Stato</p>
+                        <p className="text-xs text-muted-foreground">{t('common.status')}</p>
                         <span
                           className={`inline-block text-xs px-2 py-1 rounded ${
                             isCancelled
@@ -375,7 +377,7 @@ export function AppointmentsManagement() {
                               : 'bg-green-100 text-green-700'
                           }`}
                         >
-                          {isCancelled ? 'Cancellato' : 'Confermato'}
+                          {isCancelled ? t('appointments.cancelled') : t('appointments.confirmed')}
                         </span>
                       </div>
                     </div>
@@ -384,7 +386,7 @@ export function AppointmentsManagement() {
                         <button
                           onClick={() => handleResendEmail(apt)}
                           className="p-2 text-gray-500 hover:text-cyan-600"
-                          title="Rinvia email di conferma"
+                          title={t('appointments.resendEmail')}
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <rect width="20" height="16" x="2" y="4" rx="2"/>
@@ -396,7 +398,7 @@ export function AppointmentsManagement() {
                           size="sm"
                           onClick={() => setAppointmentToEdit(apt)}
                         >
-                          Modifica
+                          {t('common.edit')}
                         </Button>
                         <Button
                           variant="outline"
@@ -404,7 +406,7 @@ export function AppointmentsManagement() {
                           className="text-red-600 hover:text-red-700"
                           onClick={() => setAppointmentToCancel(apt)}
                         >
-                          Cancella
+                          {t('common.cancel')}
                         </Button>
                       </div>
                     )}
@@ -419,28 +421,28 @@ export function AppointmentsManagement() {
       <AlertDialog open={!!appointmentToCancel} onOpenChange={() => setAppointmentToCancel(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Conferma cancellazione</AlertDialogTitle>
+            <AlertDialogTitle>{t('dialogs.confirmCancel')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Sei sicuro di voler cancellare questo appuntamento?
+              {t('dialogs.cancelAppointment')}
               {appointmentToCancel && (
                 <>
                   <br />
-                  Paziente: {appointmentToCancel.patient_first_name}{' '}
+                  {t('common.patient')}: {appointmentToCancel.patient_first_name}{' '}
                   {appointmentToCancel.patient_last_name}
                   <br />
-                  Dr. {appointmentToCancel.doctor?.first_name}{' '}
+                  {t('doctors.drPrefix')} {appointmentToCancel.doctor?.first_name}{' '}
                   {appointmentToCancel.doctor?.last_name}
                 </>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annulla</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleCancelConfirm}
               className="bg-red-600 hover:bg-red-700"
             >
-              Cancella appuntamento
+              {t('appointments.cancelAppointment')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

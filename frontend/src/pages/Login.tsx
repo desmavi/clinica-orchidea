@@ -1,5 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,6 +19,7 @@ export function Login() {
   const [emailSent, setEmailSent] = useState(false);
   const { sendMagicLink, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // Redirect if already authenticated
   if (isAuthenticated) {
@@ -45,25 +47,25 @@ export function Login() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5 p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Controlla la tua email</CardTitle>
+            <CardTitle className="text-2xl">{t('login.checkEmail')}</CardTitle>
             <CardDescription className="text-base mt-2">
-              Ti abbiamo inviato un link per effettuare l'accesso a{' '}
+              {t('login.emailSent')}{' '}
               <span className="font-semibold text-foreground">{email}</span>
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="bg-muted rounded-lg p-4 text-center text-sm text-muted-foreground">
               <p className="mb-2">
-                Clicca sul link nell'email per accedere automaticamente.
+                {t('login.clickLink')}
               </p>
-              <p className="text-xs">Il link è valido per 1 ora.</p>
+              <p className="text-xs">{t('login.linkExpiry')}</p>
             </div>
             <Button
               variant="outline"
               className="w-full"
               onClick={() => setEmailSent(false)}
             >
-              Usa un'altra email
+              {t('login.useAnotherEmail')}
             </Button>
           </CardContent>
         </Card>
@@ -78,19 +80,19 @@ export function Login() {
           <div className="mx-auto w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white text-2xl font-bold mb-2">
             O
           </div>
-          <CardTitle className="text-3xl">Clinica Orchidea</CardTitle>
+          <CardTitle className="text-3xl">{t('login.title')}</CardTitle>
           <CardDescription className="text-base">
-            Accedi al sistema di prenotazione
+            {t('login.subtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('login.emailLabel')}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="tua@email.it"
+                placeholder={t('login.emailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -99,18 +101,18 @@ export function Login() {
                 disabled={isSubmitting}
               />
               <p className="text-sm text-muted-foreground">
-                Riceverai un link per accedere senza password
+                {t('login.emailHint')}
               </p>
             </div>
 
             <Button type="submit" className="w-full bg-cyan-600 hover:bg-cyan-700 text-white" disabled={isSubmitting}>
-              {isSubmitting ? 'Invio in corso...' : 'Invia Magic Link'}
+              {isSubmitting ? t('login.submitting') : t('login.submitButton')}
             </Button>
           </form>
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
-            <p>Nessuna password necessaria.</p>
-            <p>Ti invieremo un link sicuro via email.</p>
+            <p>{t('login.noPassword')}</p>
+            <p>{t('login.secureLink')}</p>
           </div>
         </CardContent>
       </Card>

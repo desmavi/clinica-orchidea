@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { Login } from '@/pages/Login';
 import { Doctors } from '@/pages/Doctors';
 import { DoctorDetail } from '@/pages/DoctorDetail';
@@ -14,6 +15,7 @@ import { ReactNode } from 'react';
 
 function Layout({ children }: { children: ReactNode }) {
   const { user, signOut, isAdmin } = useAuth();
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen bg-background">
@@ -21,27 +23,27 @@ function Layout({ children }: { children: ReactNode }) {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-6">
             <Link to="/" className="text-2xl font-bold">
-              Clinica Orchidea
+              {t('nav.clinicName')}
             </Link>
             <div className="hidden md:flex items-center gap-4">
               <Link to="/doctors" className="text-sm hover:text-primary">
-                Dottori
+                {t('nav.doctors')}
               </Link>
               {!isAdmin() && (
                 <Link to="/appointments" className="text-sm hover:text-primary">
-                  I miei appuntamenti
+                  {t('nav.myAppointments')}
                 </Link>
               )}
               {isAdmin() && (
                 <>
                   <Link to="/admin/doctors" className="text-sm hover:text-primary">
-                    Gestione Dottori
+                    {t('nav.doctorManagement')}
                   </Link>
                   <Link to="/admin/availability" className="text-sm hover:text-primary">
-                    Disponibilità
+                    {t('nav.availability')}
                   </Link>
                   <Link to="/admin/appointments" className="text-sm hover:text-primary">
-                    Appuntamenti
+                    {t('nav.appointments')}
                   </Link>
                 </>
               )}
@@ -52,7 +54,7 @@ function Layout({ children }: { children: ReactNode }) {
               {user?.email} ({user?.role})
             </span>
             <Button variant="outline" size="sm" onClick={signOut}>
-              Logout
+              {t('common.logout')}
             </Button>
           </div>
         </div>
@@ -64,27 +66,28 @@ function Layout({ children }: { children: ReactNode }) {
 
 function HomePage() {
   const { user, isAdmin } = useAuth();
+  const { t } = useTranslation();
 
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="max-w-2xl">
         <h2 className="text-3xl font-bold mb-4">
-          Benvenuto{user?.role === 'admin' ? ' Admin' : ''}!
+          {user?.role === 'admin' ? t('home.welcomeAdmin') : `${t('home.welcome')}!`}
         </h2>
         <p className="text-muted-foreground mb-6">
-          Prenotazione Appuntamenti
+          {t('home.subtitle')}
         </p>
 
         <div className="grid gap-4">
           <Link to="/doctors">
             <Button variant="outline" className="w-full justify-start">
-              Visualizza i nostri dottori
+              {t('home.viewDoctors')}
             </Button>
           </Link>
           {!isAdmin() && (
             <Link to="/appointments">
               <Button variant="outline" className="w-full justify-start">
-                I miei appuntamenti
+                {t('home.myAppointments')}
               </Button>
             </Link>
           )}
@@ -92,17 +95,17 @@ function HomePage() {
             <>
               <Link to="/admin/doctors">
                 <Button variant="outline" className="w-full justify-start">
-                  Gestisci dottori
+                  {t('home.manageDoctors')}
                 </Button>
               </Link>
               <Link to="/admin/availability">
                 <Button variant="outline" className="w-full justify-start">
-                  Gestisci disponibilità
+                  {t('home.manageAvailability')}
                 </Button>
               </Link>
               <Link to="/admin/appointments">
                 <Button variant="outline" className="w-full justify-start">
-                  Gestisci appuntamenti
+                  {t('home.manageAppointments')}
                 </Button>
               </Link>
             </>

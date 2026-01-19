@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Doctor, AvailabilitySlot } from '@/types';
 import { doctorsApi } from '@/services/doctors';
 import { availabilityApi } from '@/services/availability';
@@ -28,6 +29,7 @@ export function AvailabilityManagement() {
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [slotToDelete, setSlotToDelete] = useState<AvailabilitySlot | null>(null);
+  const { t } = useTranslation();
 
   // Set minimum date to tomorrow
   const tomorrow = new Date();
@@ -52,7 +54,7 @@ export function AvailabilityManagement() {
       setDoctors(data);
     } catch (error) {
       console.error('Error fetching doctors:', error);
-      toast.error('Errore nel caricamento dei dottori');
+      toast.error(t('errors.loadingDoctors'));
     }
   };
 
@@ -65,7 +67,7 @@ export function AvailabilityManagement() {
       setSlots(data);
     } catch (error) {
       console.error('Error fetching slots:', error);
-      toast.error('Errore nel caricamento degli slot');
+      toast.error(t('errors.loadingSlots'));
     } finally {
       setLoading(false);
     }
@@ -75,7 +77,7 @@ export function AvailabilityManagement() {
     e.preventDefault();
 
     if (!selectedDoctorId || !date || !startTime || !endTime) {
-      toast.error('Compila i campi idnicati con *');
+      toast.error(t('errors.fillRequiredFields'));
       return;
     }
 
@@ -87,11 +89,11 @@ export function AvailabilityManagement() {
         start_time: startTime,
         end_time: endTime,
       });
-      toast.success(`Creati ${result.slots_created} slot`);
+      toast.success(t('availabilityAdmin.slotsCreated', { count: result.slots_created }));
       fetchSlots();
     } catch (error: any) {
       console.error('Error creating slots:', error);
-      const message = error.response?.data?.detail || 'Errore nella creazione degli slot';
+      const message = error.response?.data?.detail || t('errors.creatingSlots');
       toast.error(message);
     } finally {
       setCreating(false);
@@ -101,11 +103,11 @@ export function AvailabilityManagement() {
   const handleToggle = async (slot: AvailabilitySlot) => {
     try {
       await availabilityApi.toggleAvailability(slot.id, !slot.is_available);
-      toast.success(slot.is_available ? 'Slot disabilitato' : 'Slot abilitato');
+      toast.success(slot.is_available ? t('availabilityAdmin.slotDisabled') : t('availabilityAdmin.slotEnabled'));
       fetchSlots();
     } catch (error: any) {
       console.error('Error toggling slot:', error);
-      const message = error.response?.data?.detail || 'Errore aggiornamento dello slot';
+      const message = error.response?.data?.detail || t('errors.updatingSlot');
       toast.error(message);
     }
   };
@@ -115,11 +117,11 @@ export function AvailabilityManagement() {
 
     try {
       await availabilityApi.deleteSlot(slotToDelete.id);
-      toast.success('Slot eliminato');
+      toast.success(t('availabilityAdmin.slotDeleted'));
       fetchSlots();
     } catch (error: any) {
       console.error('Error deleting slot:', error);
-      const message = error.response?.data?.detail || 'Errore eliminazione dello slot';
+      const message = error.response?.data?.detail || t('errors.deletingSlot');
       toast.error(message);
     } finally {
       setSlotToDelete(null);
@@ -135,20 +137,20 @@ export function AvailabilityManagement() {
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">Gestione Disponibilità</h1>
-        <p className="text-muted-foreground">Crea e gestisci gli slot di disponibilità dei dottori</p>
+        <h1 className="text-2xl font-bold">{t('availabilityAdmin.title')}</h1>
+        <p className="text-muted-foreground">{t('availabilityAdmin.subtitle')}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Crea Nuovi Slot</CardTitle>
-            <p className="text-xs text-muted-foreground">Gli orari sono in ora italiana (Europe/Rome)</p>
+            <CardTitle>{t('availabilityAdmin.createSlots')}</CardTitle>
+            <p className="text-xs text-muted-foreground">{t('availabilityAdmin.timezoneHint')}</p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleCreateSlots} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="doctor">Dottore</Label>
+                <Label htmlFor="doctor">{t('common.doctor')}</Label>
                 <select
                   id="doctor"
                   value={selectedDoctorId}
@@ -156,17 +158,17 @@ export function AvailabilityManagement() {
                   className="w-full h-10 px-3 rounded-md border border-input bg-background"
                   required
                 >
-                  <option value="">Seleziona un dottore</option>
+                  <option value="">{t('availabilityAdmin.selectDoctor')}</option>
                   {doctors.map((doctor) => (
                     <option key={doctor.id} value={doctor.id}>
-                      Dr. {doctor.first_name} {doctor.last_name} - {doctor.specialization}
+                      {t('doctors.drPrefix')} {doctor.first_name} {doctor.last_name} - {doctor.specialization}
                     </option>
                   ))}
                 </select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="date">Data</Label>
+                <Label htmlFor="date">{t('common.date')}</Label>
                 <Input
                   id="date"
                   type="date"
@@ -179,7 +181,7 @@ export function AvailabilityManagement() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="startTime">Ora Inizio</Label>
+                  <Label htmlFor="startTime">{t('availabilityAdmin.startTime')}</Label>
                   <Input
                     id="startTime"
                     type="time"
@@ -189,7 +191,7 @@ export function AvailabilityManagement() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="endTime">Ora Fine</Label>
+                  <Label htmlFor="endTime">{t('availabilityAdmin.endTime')}</Label>
                   <Input
                     id="endTime"
                     type="time"
@@ -205,7 +207,7 @@ export function AvailabilityManagement() {
                 disabled={creating}
                 className="w-full bg-cyan-600 hover:bg-cyan-700 text-white"
               >
-                {creating ? 'Creazione...' : 'Crea Slot'}
+                {creating ? t('availabilityAdmin.creating') : t('availabilityAdmin.createSlotsButton')}
               </Button>
             </form>
           </CardContent>
@@ -214,20 +216,20 @@ export function AvailabilityManagement() {
         <Card>
           <CardHeader>
             <CardTitle>
-              Slot Esistenti
+              {t('availabilityAdmin.existingSlots')}
               {date && ` - ${new Date(date).toLocaleDateString('it-IT')}`}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {!selectedDoctorId || !date ? (
               <p className="text-muted-foreground text-center py-8">
-                Seleziona un dottore e una data per vedere gli slot
+                {t('availabilityAdmin.selectDoctorAndDate')}
               </p>
             ) : loading ? (
-              <p className="text-muted-foreground text-center py-8">Caricamento...</p>
+              <p className="text-muted-foreground text-center py-8">{t('common.loading')}</p>
             ) : slots.length === 0 ? (
               <p className="text-muted-foreground text-center py-8">
-                Nessuno slot per questa data
+                {t('availabilityAdmin.noSlotsForDate')}
               </p>
             ) : (
               <div className="space-y-2 max-h-96 overflow-y-auto">
@@ -256,7 +258,7 @@ export function AvailabilityManagement() {
                         size="sm"
                         onClick={() => handleToggle(slot)}
                       >
-                        {slot.is_available ? 'Disabilita' : 'Abilita'}
+                        {slot.is_available ? t('availabilityAdmin.disable') : t('availabilityAdmin.enable')}
                       </Button>
                       <Button
                         variant="outline"
@@ -264,7 +266,7 @@ export function AvailabilityManagement() {
                         onClick={() => setSlotToDelete(slot)}
                         className="text-red-600 hover:text-red-700"
                       >
-                        Elimina
+                        {t('common.delete')}
                       </Button>
                     </div>
                   </div>
@@ -278,20 +280,20 @@ export function AvailabilityManagement() {
       <AlertDialog open={!!slotToDelete} onOpenChange={() => setSlotToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Conferma eliminazione</AlertDialogTitle>
+            <AlertDialogTitle>{t('dialogs.confirmDelete')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Sei sicuro di voler eliminare lo slot{' '}
+              {t('dialogs.deleteSlot')}{' '}
               {slotToDelete && `${formatTime(slotToDelete.start_time)} - ${formatTime(slotToDelete.end_time)}`}?
-              Questa azione è irreversibile.
+              {' '}{t('dialogs.irreversibleSlot')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annulla</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-red-600 hover:bg-red-700"
             >
-              Elimina
+              {t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

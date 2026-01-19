@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Doctor, DoctorCreate } from '@/types';
 import { doctorsApi } from '@/services/doctors';
 import { DoctorCard } from '@/components/DoctorCard';
@@ -23,6 +24,7 @@ export function DoctorsManagement() {
   const [showForm, setShowForm] = useState(false);
   const [editingDoctor, setEditingDoctor] = useState<Doctor | null>(null);
   const [deletingDoctor, setDeletingDoctor] = useState<Doctor | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     fetchDoctors();
@@ -35,7 +37,7 @@ export function DoctorsManagement() {
       setDoctors(data);
     } catch (error) {
       console.error('Error fetching doctors:', error);
-      toast.error('Errore nel caricamento dei dottori');
+      toast.error(t('errors.loadingDoctors'));
     } finally {
       setLoading(false);
     }
@@ -60,11 +62,11 @@ export function DoctorsManagement() {
 
     try {
       await doctorsApi.delete(deletingDoctor.id);
-      toast.success('Dottore eliminato');
+      toast.success(t('doctorsAdmin.doctorDeleted'));
       fetchDoctors();
     } catch (error) {
       console.error('Error deleting doctor:', error);
-      toast.error('Errore nell\'eliminazione del dottore');
+      toast.error(t('errors.deletingDoctor'));
     } finally {
       setDeletingDoctor(null);
     }
@@ -75,17 +77,17 @@ export function DoctorsManagement() {
     try {
       if (editingDoctor) {
         await doctorsApi.update(editingDoctor.id, data);
-        toast.success('Dottore aggiornato');
+        toast.success(t('doctorsAdmin.doctorUpdated'));
       } else {
         await doctorsApi.create(data);
-        toast.success('Dottore creato');
+        toast.success(t('doctorsAdmin.doctorCreated'));
       }
       setShowForm(false);
       setEditingDoctor(null);
       fetchDoctors();
     } catch (error) {
       console.error('Error saving doctor:', error);
-      toast.error('Errore nel salvataggio');
+      toast.error(t('errors.savingDoctor'));
     } finally {
       setSaving(false);
     }
@@ -100,12 +102,12 @@ export function DoctorsManagement() {
     <div className="container mx-auto px-4 py-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Gestione Dottori</h1>
-          <p className="text-muted-foreground">Aggiungi, modifica o elimina i dottori</p>
+          <h1 className="text-2xl font-bold">{t('doctorsAdmin.title')}</h1>
+          <p className="text-muted-foreground">{t('doctorsAdmin.subtitle')}</p>
         </div>
         {!showForm && (
           <Button onClick={handleCreate} className="bg-cyan-600 hover:bg-cyan-700 text-white">
-            Nuovo Dottore
+            {t('doctorsAdmin.newDoctor')}
           </Button>
         )}
       </div>
@@ -123,13 +125,13 @@ export function DoctorsManagement() {
 
       {loading ? (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">Caricamento...</p>
+          <p className="text-muted-foreground">{t('common.loading')}</p>
         </div>
       ) : doctors.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">Nessun dottore presente</p>
+          <p className="text-muted-foreground">{t('doctorsAdmin.noDoctors')}</p>
           <Button className="mt-4 bg-cyan-600 hover:bg-cyan-700 text-white" onClick={handleCreate}>
-            Aggiungi il primo dottore
+            {t('doctorsAdmin.addFirstDoctor')}
           </Button>
         </div>
       ) : (
@@ -149,21 +151,21 @@ export function DoctorsManagement() {
       <AlertDialog open={!!deletingDoctor} onOpenChange={() => setDeletingDoctor(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Conferma eliminazione</AlertDialogTitle>
+            <AlertDialogTitle>{t('dialogs.confirmDelete')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Sei sicuro di voler eliminare{' '}
-              <strong>Dr. {deletingDoctor?.first_name} {deletingDoctor?.last_name}</strong>?
+              {t('dialogs.deleteDoctor')}{' '}
+              <strong>{t('doctors.drPrefix')} {deletingDoctor?.first_name} {deletingDoctor?.last_name}</strong>?
               <br />
-              Questa azione non può essere annullata.
+              {t('dialogs.irreversible')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annulla</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-red-600 hover:bg-red-700 text-white"
             >
-              Elimina
+              {t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

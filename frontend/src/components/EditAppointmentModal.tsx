@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Appointment } from '@/types';
 import { appointmentsApi } from '@/services/appointments';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,7 @@ export function EditAppointmentModal({ appointment, onClose, onSuccess }: EditAp
   const [phone, setPhone] = useState(appointment.patient_phone);
   const [email, setEmail] = useState(appointment.patient_email);
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const cleaned = e.target.value.replace(/[^\d+]/g, '');
@@ -31,12 +33,12 @@ export function EditAppointmentModal({ appointment, onClose, onSuccess }: EditAp
     e.preventDefault();
 
     if (!firstName || !lastName || !phone || !email) {
-      toast.error('Compila tutti i campi');
+      toast.error(t('errors.fillAllFields'));
       return;
     }
 
     if (getPhoneDigits(phone).length < 10) {
-      toast.error('Il numero di telefono deve avere almeno 10 cifre');
+      toast.error(t('errors.phoneMinDigits'));
       return;
     }
 
@@ -48,14 +50,14 @@ export function EditAppointmentModal({ appointment, onClose, onSuccess }: EditAp
         patient_phone: phone,
         patient_email: email,
       });
-      toast.success('Appuntamento aggiornato');
+      toast.success(t('appointments.appointmentUpdated'));
       onSuccess();
     } catch (error: any) {
       console.error('Error updating appointment:', error);
       const detail = error.response?.data?.detail;
       const message = Array.isArray(detail)
         ? detail.map((d: any) => d.msg).join(', ')
-        : detail || 'Errore durante aggiornamento';
+        : detail || t('errors.updating');
       toast.error(message);
     } finally {
       setLoading(false);
@@ -70,13 +72,13 @@ export function EditAppointmentModal({ appointment, onClose, onSuccess }: EditAp
       />
       <Card className="relative z-10 w-full max-w-md mx-4">
         <CardHeader>
-          <CardTitle>Modifica Appuntamento</CardTitle>
+          <CardTitle>{t('editAppointment.title')}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName">Nome *</Label>
+                <Label htmlFor="firstName">{t('common.firstName')} {t('common.required')}</Label>
                 <Input
                   id="firstName"
                   value={firstName}
@@ -85,7 +87,7 @@ export function EditAppointmentModal({ appointment, onClose, onSuccess }: EditAp
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName">Cognome *</Label>
+                <Label htmlFor="lastName">{t('common.lastName')} {t('common.required')}</Label>
                 <Input
                   id="lastName"
                   value={lastName}
@@ -96,7 +98,7 @@ export function EditAppointmentModal({ appointment, onClose, onSuccess }: EditAp
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone">Telefono *</Label>
+              <Label htmlFor="phone">{t('common.phone')} {t('common.required')}</Label>
               <Input
                 id="phone"
                 type="tel"
@@ -107,7 +109,7 @@ export function EditAppointmentModal({ appointment, onClose, onSuccess }: EditAp
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
+              <Label htmlFor="email">{t('common.email')} {t('common.required')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -125,14 +127,14 @@ export function EditAppointmentModal({ appointment, onClose, onSuccess }: EditAp
                 className="flex-1"
                 disabled={loading}
               >
-                Annulla
+                {t('common.cancel')}
               </Button>
               <Button
                 type="submit"
                 disabled={loading}
                 className="flex-1 bg-cyan-600 hover:bg-cyan-700 text-white"
               >
-                {loading ? 'Salvataggio...' : 'Salva'}
+                {loading ? t('doctorForm.saving') : t('common.save')}
               </Button>
             </div>
           </form>
