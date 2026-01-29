@@ -84,6 +84,12 @@ class AppointmentService:
         except HTTPException:
             raise
         except Exception as e:
+            # Catch unique constraint violation (PostgreSQL code 23505)
+            if "duplicate key" in str(e) or "23505" in str(e):
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Slot non più disponibile"
+                )
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Errore nella creazione dell'appuntamento: {str(e)}"
@@ -148,6 +154,12 @@ class AppointmentService:
         except HTTPException:
             raise
         except Exception as e:
+            # Catch unique constraint violation (PostgreSQL code 23505)
+            if "duplicate key" in str(e) or "23505" in str(e):
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Slot non più disponibile"
+                )
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Errore nella creazione dell'appuntamento: {str(e)}"
